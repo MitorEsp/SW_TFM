@@ -1,6 +1,5 @@
 #include "widget.h"
 #include "./ui_widget.h"
-#include "connectinteface.h"
 
 #include <QListWidget>
 
@@ -19,23 +18,41 @@ Widget::~Widget()
 
 void Widget::on_connectButton_clicked()
 {
-    QString txt = "PC: Connecting with 16.0.0.16";
-    ui->listWidget->addItem(txt);
-
     ConnectInteface CnnIf;
+    errorConnIntf erCnnIf;
 
-    if(CnnIf.CheckConnect()){
+    ui->listWidget->addItem("PC: Connecting with 16.0.0.16");
+
+    this->CnnIfPtr = &CnnIf;
+
+    erCnnIf = CnnIf.CheckConnect();
+
+    if(!erCnnIf){
         ui->listWidget->addItem("PC: 16.0.0.16 is available");
     }else{
         ui->listWidget->addItem("PC: 16.0.0.16 is not available");
+        ui->listWidget->addItem(stringErrorConnIntf[erCnnIf-1]);
     }
 }
 
 
 void Widget::on_initButton_clicked()
 {
-    QString txt = "Test started";
-    ui->listWidget->addItem(txt);
+    errorConnIntf erCnnIf;
+
+    if(this->CnnIfPtr == NULL){
+         ui->listWidget->addItem("PC: Error: Connection not yet initialized");
+    }
+    else{
+        erCnnIf = this->CnnIfPtr->RunTest();
+    }
+
+    if(!erCnnIf){
+        ui->listWidget->addItem("PC: Test succesfull");
+    }else{
+        ui->listWidget->addItem("PC: Test failed");
+        ui->listWidget->addItem(stringErrorConnIntf[erCnnIf-1]);
+    }
 }
 
 
@@ -43,6 +60,7 @@ void Widget::on_stopButton_clicked()
 {
     QString txt = "Test stopped and finished";
     ui->listWidget->addItem(txt);
+    ui->stopButton->
 }
 
 
@@ -50,4 +68,6 @@ void Widget::on_clearLogButton_clicked()
 {
     ui->listWidget->clear();
 }
+
+
 
