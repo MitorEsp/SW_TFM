@@ -93,9 +93,6 @@ errorConnIntf ConnectInteface::RunTest(void){
     char server_message[30];
     char client_message[] = "WG0:*IDN?";
 
-    int index;
-
-    for(index=0;index<10;index++){
 
     // Clean buffers:
     memset(server_message, '\0', sizeof(server_message));
@@ -126,12 +123,6 @@ errorConnIntf ConnectInteface::RunTest(void){
 
     // Close the socket:
     close(socket_desc);
-
-
-
-    sleep(1);
-
-    }
 
 
     return NO_ERROR;

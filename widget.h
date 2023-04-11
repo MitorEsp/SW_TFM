@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QTimer>
 
 #include "connectinteface.h"
 
@@ -18,6 +19,7 @@ public:
     ~Widget();
 
 private slots:
+
     void on_connectButton_clicked();
 
     void on_initButton_clicked();
@@ -26,7 +28,13 @@ private slots:
 
     void on_clearLogButton_clicked();
 
+    void onGoingTest();
+
 private:
     Ui::Widget *ui;
+
+    ConnectInteface *CnnIfPtr;
+    QTimer timer;
+    int messageNo = 1;
 };
 #endif // WIDGET_H

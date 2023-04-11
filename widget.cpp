@@ -8,13 +8,15 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    ui->stopButton->setEnabled(false);
+
+    connect(&timer, &QTimer::timeout, this, &Widget::onGoingTest);
 }
 
 Widget::~Widget()
 {
     delete ui;
 }
-
 
 void Widget::on_connectButton_clicked()
 {
@@ -35,39 +37,39 @@ void Widget::on_connectButton_clicked()
     }
 }
 
-
 void Widget::on_initButton_clicked()
 {
-    errorConnIntf erCnnIf;
-
-    if(this->CnnIfPtr == NULL){
-         ui->listWidget->addItem("PC: Error: Connection not yet initialized");
-    }
-    else{
-        erCnnIf = this->CnnIfPtr->RunTest();
-    }
-
-    if(!erCnnIf){
-        ui->listWidget->addItem("PC: Test succesfull");
-    }else{
-        ui->listWidget->addItem("PC: Test failed");
-        ui->listWidget->addItem(stringErrorConnIntf[erCnnIf-1]);
-    }
+    ui->initButton->setEnabled(false);
+    ui->stopButton->setEnabled(true);
+    ui->progressBar->setValue(0);
+    this->timer.start(800);
 }
-
 
 void Widget::on_stopButton_clicked()
 {
-    QString txt = "Test stopped and finished";
-    ui->listWidget->addItem(txt);
-    ui->stopButton->
+    ui->initButton->setEnabled(true);
+    ui->stopButton->setEnabled(false);
+    this->timer.stop();
+    this->messageNo = 1;
 }
-
 
 void Widget::on_clearLogButton_clicked()
 {
     ui->listWidget->clear();
+    this->messageNo = 1;
 }
 
+void Widget::onGoingTest()
+{
+    QString txt = "Mensaje numero: ";
+    QString num;
+    num.setNum(this->messageNo);
+    txt.append(num);
+    ui->listWidget->addItem(txt);
+    ui->progressBar->setValue(this->messageNo*10);
 
-
+    if(this->messageNo>9){
+        Widget::on_stopButton_clicked();
+    }
+    this->messageNo++;
+}
