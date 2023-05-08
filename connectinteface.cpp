@@ -1,18 +1,22 @@
 #include "connectinteface.h"
 #include <stdio.h>
-#include <string.h>
+
 #include <unistd.h>
 #include <sys/time.h>
 
 
-
-
-
 ConnectInteface::ConnectInteface()
+{
+    SERVER_IP_ADDRESS[0] = 16;
+    SERVER_IP_ADDRESS[1] = 0;
+    SERVER_IP_ADDRESS[2] = 0;
+    SERVER_IP_ADDRESS[3] = 16;
+}
+
+ConnectInteface::~ConnectInteface()
 {
 
 }
-
 
 errorConnIntf ConnectInteface::createSocket(int &socket_desc, struct sockaddr_in &server_addr, unsigned int &server_struct_length){
 
@@ -25,7 +29,7 @@ errorConnIntf ConnectInteface::createSocket(int &socket_desc, struct sockaddr_in
 
     //time to wait in a comunication
     tv.tv_sec = 0;
-    tv.tv_usec = 10000; // 10ms
+    tv.tv_usec = 100000; // 10ms
     setsockopt(socket_desc, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     setsockopt(socket_desc, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 
@@ -41,24 +45,23 @@ errorConnIntf ConnectInteface::createSocket(int &socket_desc, struct sockaddr_in
     return NO_ERROR;
 }
 
-errorConnIntf ConnectInteface::CheckConnect(){
+
+
+errorConnIntf ConnectInteface::Send_command(char *cmd, int len_cmd, char *server_message, int len_ser_msg){
 
     int socket_desc;
     struct sockaddr_in server_addr;
     unsigned int server_struct_length;
 
-    char server_message[30];
-    char client_message[] = "WG0:*IDN?";
-
     // Clean buffers:
-    memset(server_message, '\0', sizeof(server_message));
+    memset(server_message, '\0', len_ser_msg);
 
     if(createSocket(socket_desc, server_addr, server_struct_length)){
         return ERCI_CREATE_SOCKET;
     }
 
     // Send the message to server:
-    if(sendto(socket_desc, client_message, strlen(client_message), 0,
+    if(sendto(socket_desc, cmd, len_cmd, 0,
                (struct sockaddr*)&server_addr, server_struct_length) < 0){
 
         // Close the socket:
@@ -68,51 +71,7 @@ errorConnIntf ConnectInteface::CheckConnect(){
     }
 
     // Receive the server's response:
-    if(recvfrom(socket_desc, server_message, sizeof(server_message), 0,
-               (struct sockaddr*)&server_addr, &server_struct_length) < 0){
-
-        // Close the socket:
-        close(socket_desc);
-
-        return ERCI_RECV_MESSAGE;
-    }
-
-    // Close the socket:
-    close(socket_desc);
-
-    return NO_ERROR;
-}
-
-
-errorConnIntf ConnectInteface::RunTest(void){
-
-    int socket_desc;
-    struct sockaddr_in server_addr;
-    unsigned int server_struct_length;
-
-    char server_message[30];
-    char client_message[] = "WG0:*IDN?";
-
-
-    // Clean buffers:
-    memset(server_message, '\0', sizeof(server_message));
-
-    if(createSocket(socket_desc, server_addr, server_struct_length)){
-        return ERCI_CREATE_SOCKET;
-    }
-
-    // Send the message to server:
-    if(sendto(socket_desc, client_message, strlen(client_message), 0,
-               (struct sockaddr*)&server_addr, server_struct_length) < 0){
-
-        // Close the socket:
-        close(socket_desc);
-
-        return ERCI_SEND_MESSAGE;
-    }
-
-    // Receive the server's response:
-    if(recvfrom(socket_desc, server_message, sizeof(server_message), 0,
+    if(recvfrom(socket_desc, server_message, len_ser_msg, 0,
                  (struct sockaddr*)&server_addr, &server_struct_length) < 0){
 
         // Close the socket:
@@ -127,4 +86,8 @@ errorConnIntf ConnectInteface::RunTest(void){
 
     return NO_ERROR;
 }
+
+
+
+
 
