@@ -13,6 +13,14 @@ ConnectInteface::ConnectInteface() {
 
 ConnectInteface::~ConnectInteface() {}
 
+/*!
+    \brief Send a command via UDP
+
+    \param *cmd buffer with a command info
+    \param len_cmd lenght of *cmd buffer
+    \param *server_message buffer for answer
+    \param len_ser_msg lenght of *server_message buffer
+*/
 errorConnIntf ConnectInteface::Send_command(char *cmd, int len_cmd,
                                             char *server_message,
                                             int len_ser_msg) {
@@ -33,7 +41,7 @@ errorConnIntf ConnectInteface::Send_command(char *cmd, int len_cmd,
 
   // time to wait in a comunication
   tv.tv_sec = 0;
-  tv.tv_usec = 200000; // 5ms
+  tv.tv_usec = 200000; // 200ms
   setsockopt(socket_desc, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
   setsockopt(socket_desc, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 
@@ -84,6 +92,12 @@ errorConnIntf ConnectInteface::Send_command(char *cmd, int len_cmd,
   return NO_ERROR;
 }
 
+/*!
+    \brief Receive a command via UDP
+
+    \param *server_message buffer for answer
+    \param len_ser_msg lenght of *server_message buffer
+*/
 errorConnIntf ConnectInteface::Receive_command(char *server_message,
                                                int len_ser_msg) {
 

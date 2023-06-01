@@ -1,6 +1,8 @@
 #include "widget.h"
 #include "./ui_widget.h"
 
+#include <math.h>
+
 #include <QListWidget>
 
 Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
@@ -12,6 +14,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
 
 Widget::~Widget() { delete ui; }
 
+/*!
+    \brief Call-back for Connect Button. Send TST and IDN command.
+    Set the info in logger widget.
+*/
 void Widget::on_connectButton_clicked() {
   ConnectInteface CnnIf;
   errorConnIntf erCnnIf;
@@ -58,8 +64,11 @@ void Widget::on_connectButton_clicked() {
     ui->listWidget->addItem("PC: Error: ");
     ui->listWidget->addItem(stringErrorConnIntf[erCnnIf - 1]);
   }
-}
+}//on_connectButton_clicked
 
+/*!
+    \brief Call-back for init button. Send INIT command and initialice the logger.
+*/
 void Widget::on_initButton_clicked() {
   ConnectInteface CnnIf;
   errorConnIntf erCnnIf;
@@ -74,15 +83,22 @@ void Widget::on_initButton_clicked() {
     ui->stopButton->setEnabled(true);
     tstStep = 0;
     ui->progressBar->setValue(100 * tstStep / MAX_STEP);
+    ui->listWid_test->addItem("Frequency\tbBpT");
     this->timer.start(1250);
   } else {
     ui->listWidget->addItem("PC: Test not started\nPC: Error: ");
     ui->listWidget->addItem(stringErrorConnIntf[erCnnIf - 1]);
   }
-}
+}//on_initButton_clicked
 
-void Widget::on_stopButton_clicked() { this->stopTest = true; }
+/*!
+    \brief Call-back for stop button. Enable stop test flag.
+*/
+void Widget::on_stopButton_clicked() { this->stopTest = true; }//on_stopButton_clicked
 
+/*!
+    \brief Function to stop the test. Send ABOR command and reconfigure the GUI.
+*/
 void Widget::stop_test() {
   this->timer.stop();
   ConnectInteface CnnIf;
@@ -104,17 +120,22 @@ void Widget::stop_test() {
     ui->listWidget->addItem("PC: Error: ");
     ui->listWidget->addItem(stringErrorConnIntf[erCnnIf - 1]);
   }
-}
+}//stop_test
 
+/*!
+    \brief Call-back for Clear Log Button. Clear both logs.
+*/
 void Widget::on_clearLogButton_clicked() {
   ui->listWidget->clear();
   ui->listWid_test->clear();
 
   ui->progressBar->setValue(0);
-}
+}//on_clearLogButton_clicked
 
-/* aca ves enviando los mssg para ir teniendo feedbak y vas analizando l oque
- * llega */
+/*!
+    \brief Call-back for test timer iteration. Send UDP command, receieve and analice the answer
+    puts data in onTest widget and send KEEP command
+*/
 void Widget::on_going_test() {
 
   ConnectInteface CnnIf;
@@ -132,7 +153,6 @@ void Widget::on_going_test() {
   if (this->stopTest) {
     Widget::stop_test();
   } else {
-
 
     erCnnIf = CnnIf.Send_command((char *)CMD_UPD, sizeof(CMD_UPD),
                                  server_message, sizeof(server_message));
@@ -177,7 +197,8 @@ void Widget::on_going_test() {
 
           txt.append(num.setNum(actualFreq))
               .append("\t")
-              .append(num.setNum(maxSample));
+              .append(
+                  num.setNum(20 * log10(maxSample * 5 * 9.5 * pow(10.0, 7.0))));
 
           ui->listWid_test->addItem(txt);
 
@@ -197,4 +218,4 @@ void Widget::on_going_test() {
       Widget::stop_test();
     }
   }
-}
+}// on_going_test
